@@ -7,7 +7,7 @@ ButtonOrder::ButtonOrder() {
 }
 // Deleter
 ButtonOrder::~ButtonOrder() {
-    Serial.println("Deleted button order list");
+    // Serial.println("Deleted button order list");
 }
 
 int ButtonOrder::getPresses() {
