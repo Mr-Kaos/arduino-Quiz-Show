@@ -1,0 +1,27 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/home/kristian/arduino-1.8.15/tools/**",
+                "/home/kristian/arduino-1.8.15/hardware/arduino/avr/**",
+                "/home/kristian/arduino-1.8.15/hardware/tools/**",
+                "/home/kristian/arduino-1.8.15/hardware/arduino/avr/cores/arduino/"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/g++",
+            "cStandard": "gnu17",
+            "cppStandard": "gnu++14",
+            "intelliSenseMode": "linux-gcc-x64",
+            "compilerArgs": [],
+            "browse": {
+                "path": [
+                    "${workspaceFolder}/**"
+                ],
+                "limitSymbolsToIncludedHeaders": true
+            }
+        }
+    ],
+    "version": 4
+}
