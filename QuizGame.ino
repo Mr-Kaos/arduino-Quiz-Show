@@ -2,9 +2,8 @@
 #include "Arduino.h"
 // #include "ButtonOrder.h"
 #include "Game.h"
-//#include "arduino-timer.h"
+#include "PiezoTones.h"
 
-//auto timer = timer_create_default();
 boolean anyButtonPressed = false;
 boolean gameRunning = false;
 boolean stopReset = false;
@@ -15,10 +14,13 @@ unsigned long debounceDelay = 50;    // the debounce time; increase if the outpu
 
 // Player initialisation.
 // Parameters: Player Number, LED pin, Button Pin, LED state, was their button pressed, score.
-Player* p1 = new Player (1, 9,  2, LOW, NOT_PRESSED, 0);
-Player* p2 = new Player (2, 10, 3, LOW, NOT_PRESSED, 0);
-Player* p3 = new Player (3, 11, 4, LOW, NOT_PRESSED, 0);
-Player* p4 = new Player (4, 12, 5, LOW, NOT_PRESSED, 0);
+Player* p1 = new Player (1, 8,  2, LOW, NOT_PRESSED, 0);
+Player* p2 = new Player (2, 9, 3, LOW, NOT_PRESSED, 0);
+Player* p3 = new Player (3, 10, 4, LOW, NOT_PRESSED, 0);
+Player* p4 = new Player (4, 11, 5, LOW, NOT_PRESSED, 0);
+
+// List of players to allow for easy looping for repetitive tasks
+Player* playerList[MAX_PLAYERS] = {p1, p2, p3, p4};
 
 //ButtonOrder* pressOrder = new ButtonOrder;
 // Array to store button press order
@@ -26,20 +28,25 @@ int pressPosition = 0;
 Player* tmpPointer = nullptr;
 Player* pressOrder[MAX_PLAYERS];
 
-void setup()
-{
+// Piezo Melodies
+unsigned long lastMelodyStart;
+int buzzerPress[BUZZER_MELODY] = { NOTE_C4, NOTE_G3, NOTE_C4, NOTE_G3, NOTE_C4, NOTE_G3, NOTE_C4, NOTE_G3, NOTE_C4, NOTE_G3 };
+int buzzerPressDuration[BUZZER_MELODY] = { 4, 4, 4, 4, 4, 4, 4, 4, 4, 4};
+
+void setup() {
+    // assign pressOrder array with null pointers
     clearPressOrder();
 
     // Master user initialisation
     pinMode(masterSwitch, INPUT); // Master Button
 
-    assignPin(p1);
-    assignPin(p2);
-    assignPin(p3);
-    assignPin(p4);
+    // Assign each player pins for their LEDs and buttons 
+    for (Player* player : playerList) {
+        assignPin(player);
+    }
     
     Serial.begin(9600);
-        while (!Serial) {
+    while (!Serial) {
     }
 
     // Piezo speaker setup
@@ -52,52 +59,21 @@ void assignPin(Player* player) {
 }
 
 void loop() {
-    
     // PLAYER BUTTONS
     if (digitalRead(p1->getPinBtn()) == LOW) {
         buttonPress(p1);
-    } else {
-        //digitalWrite((p1->getPinLED()), LOW);
     }
-
     if (digitalRead(p2->getPinBtn()) == LOW) {
-        // Serial.println("P2");
-        // if (p2->getLEDState() == LOW) {
-        //     if (!anyButtonPressed) {
-        //         p2->setLEDState(HIGH);
-        //     }
-        //     if (!p2->wasButtonPressed()) {
-        //         pressOrder[pressPosition] = p2;
-        //         pressPosition++;
-        //         p2->setButtonPressed(true);
-        //         Serial.println("Added p2 to collection");
-        //     }
-        //     // pressOrder[pressPosition] = p2;
-        //     // pressPosition++;
-        //     // //pressOrder->addElement(p2);
-        //     // Serial.println("Added p2 to collection");
-        //     anyButtonPressed = true;
-        // }
-        // digitalWrite((p2->getPinLED()), p2->getLEDState());
         buttonPress(p2);
-    } else {
-        //digitalWrite((p2->getPinLED()), LOW);
     }
-
     if (digitalRead(p3->getPinBtn()) == LOW) {
         buttonPress(p3);
-    } else {
-        //digitalWrite((p2->getPinLED()), LOW);
     }
-
     if (digitalRead(p4->getPinBtn()) == LOW) {
         buttonPress(p4);
-    } else {
-        //digitalWrite((p2->getPinLED()), LOW);
     }
 
     // MASTER CONTROL
-    // reset LEDS
     if (digitalRead(masterSwitch) == HIGH && !stopReset) {
         Serial.println("MASTER SWITCH");
         for (int i = 0; i < MAX_PLAYERS; ++i) {
@@ -113,14 +89,11 @@ void loop() {
         clearPressOrder();
         anyButtonPressed = false;
 
-        p1->setButtonPressed(false);
-        p2->setButtonPressed(false);
-        p3->setButtonPressed(false);
-        p4->setButtonPressed(false);
-        digitalWrite(p1->getPinLED(), p1->getLEDState());
-        digitalWrite(p2->getPinLED(), p2->getLEDState());
-        digitalWrite(p3->getPinLED(), p3->getLEDState());
-        digitalWrite(p4->getPinLED(), p4->getLEDState());
+        // reset LEDS
+        for (Player* player : playerList) {
+            player->setButtonPressed(false);
+            digitalWrite(player->getPinLED(), player->getLEDState());
+        }
         pressPosition = 0;
         stopReset = false;
     }
@@ -141,6 +114,7 @@ void buttonPress(Player* player) {
             Serial.print("Added player ");
             Serial.print(player->getID());
             Serial.println(" to collection.");
+            playMelody(buzzerPress, buzzerPressDuration);
         }
         anyButtonPressed = true;
     }
@@ -151,5 +125,19 @@ void clearPressOrder() {
     for (int i = 0; i < MAX_PLAYERS; ++i) {
         pressOrder[i]->setLEDState(LOW);
         pressOrder[i] = tmpPointer;
+    }
+}
+
+void playMelody(int melody[], int melodyDurations[]) {
+    for (int note = 0; note < 10; ++note) {
+        // int noteDuration = 1000 / melodyDurations[note];
+        //tone(PIEZO_PIN, melody[note], noteDuration);
+       
+        noTone(PIEZO_PIN);
+        Serial.println(melody[note]);
+        if (millis() - lastMelodyStart >= 1000) {
+            lastMelodyStart += 1000;
+            tone(PIEZO_PIN, 500, 1000);
+        }
     }
 }
