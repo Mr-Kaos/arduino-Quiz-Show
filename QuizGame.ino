@@ -91,7 +91,7 @@ void loop() {
     }
 
     if (digitalRead(p4->getPinBtn()) == LOW) {
-        //buttonPress(p4);
+        buttonPress(p4);
     } else {
         //digitalWrite((p2->getPinLED()), LOW);
     }
@@ -101,8 +101,8 @@ void loop() {
     if (digitalRead(masterSwitch) == HIGH && !stopReset) {
         Serial.println("MASTER SWITCH");
         for (int i = 0; i < MAX_PLAYERS; ++i) {
-            Serial.print(pressOrder[i]->getID());
-            Serial.println(pressOrder[i]->getPinBtn());
+            Serial.print("PLAYER: ");
+            Serial.println(pressOrder[i]->getID());
             digitalWrite(pressOrder[i]->getPinLED(), pressOrder[i]->getLEDState());
         }
         stopReset = true;
@@ -120,6 +120,7 @@ void loop() {
         digitalWrite(p1->getPinLED(), p1->getLEDState());
         digitalWrite(p2->getPinLED(), p2->getLEDState());
         digitalWrite(p3->getPinLED(), p3->getLEDState());
+        digitalWrite(p4->getPinLED(), p4->getLEDState());
         pressPosition = 0;
         stopReset = false;
     }
